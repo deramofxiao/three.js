@@ -41,7 +41,7 @@
 				camera.lookAt( 0, 200, 0 );
 
 				scene = new THREE.Scene();
-				scene.add( new THREE.GridHelper( 1000, 10 ) );
+				scene.add( new THREE.GridHelper( 1000, 10, 0x888888, 0x444444 ) );
 
 				var light = new THREE.DirectionalLight( 0xffffff, 2 );
 				light.position.set( 1, 1, 1 );
@@ -161,11 +161,6 @@
 
 		</script>
 
-		<script>
-			if (navigator.webdriver) { // off for testing
-				setTimeout(() => { document.getElementsByTagName('div')[1].style.display = 'none' }, 750)
-			}
-		</script>
-
+		<script>if ( typeof TESTING !== 'undefined' ) { setTimeout(() => { var a = document.querySelectorAll( 'body > div' ); a[1].style.display = 'none'; }, 750); }</script>
 	</body>
 </html>

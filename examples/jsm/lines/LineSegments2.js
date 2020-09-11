@@ -1,8 +1,3 @@
-/**
- * @author WestLangley / http://github.com/WestLangley
- *
- */
-
 import {
 	InstancedInterleavedBuffer,
 	InterleavedBufferAttribute,
@@ -18,12 +13,12 @@ import { LineMaterial } from "../lines/LineMaterial.js";
 
 var LineSegments2 = function ( geometry, material ) {
 
-	Mesh.call( this );
+	if ( geometry === undefined ) geometry = new LineSegmentsGeometry();
+	if ( material === undefined ) material = new LineMaterial( { color: Math.random() * 0xffffff } );
+
+	Mesh.call( this, geometry, material );
 
 	this.type = 'LineSegments2';
-
-	this.geometry = geometry !== undefined ? geometry : new LineSegmentsGeometry();
-	this.material = material !== undefined ? material : new LineMaterial( { color: Math.random() * 0xffffff } );
 
 };
 

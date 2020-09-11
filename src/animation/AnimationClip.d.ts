@@ -9,7 +9,15 @@ export class AnimationClip {
 
 	name: string;
 	tracks: KeyframeTrack[];
+
+	/**
+	 * @default THREE.NormalAnimationBlendMode
+	 */
 	blendMode: AnimationBlendMode;
+
+	/**
+	 * @default -1
+	 */
 	duration: number;
 	uuid: string;
 	results: any[];
@@ -35,8 +43,7 @@ export class AnimationClip {
 	static parse( json: any ): AnimationClip;
 	static parseAnimation(
 		animation: any,
-		bones: Bone[],
-		nodeName: string
+		bones: Bone[]
 	): AnimationClip;
 	static toJSON(): any;
 
