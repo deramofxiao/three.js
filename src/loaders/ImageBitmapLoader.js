@@ -63,7 +63,11 @@ ImageBitmapLoader.prototype = Object.assign( Object.create( Loader.prototype ), 
 
 		}
 
-		fetch( url ).then( function ( res ) {
+		const fetchOptions = {};
+		fetchOptions.credentials = ( this.crossOrigin === 'anonymous' ) ? 'same-origin' : 'include';
+		fetchOptions.headers = this.requestHeader;
+
+		fetch( url, fetchOptions ).then( function ( res ) {
 
 			return res.blob();
 

@@ -27,13 +27,25 @@ class WebGPUAttributes {
 
 	}
 
-	update( attribute, isIndex = false ) {
+	update( attribute, isIndex = false, usage = null ) {
 
 		let data = this.buffers.get( attribute );
 
 		if ( data === undefined ) {
 
-			const usage = ( isIndex === true ) ? GPUBufferUsage.INDEX : GPUBufferUsage.VERTEX;
+			if ( usage === null ) {
+
+				usage = ( isIndex === true ) ? GPUBufferUsage.INDEX : GPUBufferUsage.VERTEX;
+
+			}
+
+			data = this._createBuffer( attribute, usage );
+
+			this.buffers.set( attribute, data );
+
+		} else if ( usage && usage !== data.usage ) {
+
+			data.buffer.destroy();
 
 			data = this._createBuffer( attribute, usage );
 
@@ -52,7 +64,7 @@ class WebGPUAttributes {
 	_createBuffer( attribute, usage ) {
 
 		const array = attribute.array;
-		const size = array.byteLength + ( array.byteLength % 4 ); // ensure 4 byte alignment
+		const size = array.byteLength + ( ( 4 - ( array.byteLength % 4 ) ) % 4 ); // ensure 4 byte alignment, see #20441
 
 		const buffer = this.device.createBuffer( {
 			size: size,
@@ -68,7 +80,8 @@ class WebGPUAttributes {
 
 		return {
 			version: attribute.version,
-			buffer: buffer
+			buffer: buffer,
+			usage: usage
 		};
 
 	}
@@ -82,7 +95,7 @@ class WebGPUAttributes {
 
 			// Not using update ranges
 
-			this.device.defaultQueue.writeBuffer(
+			this.device.queue.writeBuffer(
 				buffer,
 				0,
 				array,
@@ -91,7 +104,7 @@ class WebGPUAttributes {
 
 		} else {
 
-			this.device.defaultQueue.writeBuffer(
+			this.device.queue.writeBuffer(
 				buffer,
 				0,
 				array,
