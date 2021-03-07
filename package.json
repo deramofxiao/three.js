@@ -1,6 +1,6 @@
 {
   "name": "three",
-  "version": "0.125.2",
+  "version": "0.126.0",
   "description": "JavaScript 3D library",
   "main": "build/three.js",
   "module": "build/three.module.js",
@@ -8,6 +8,7 @@
     "type": "git",
     "url": "https://github.com/mrdoob/three.js"
   },
+  "sideEffects": false,
   "files": [
     "build/three.js",
     "build/three.min.js",
@@ -26,7 +27,6 @@
     "test": "test"
   },
   "eslintConfig": {
-    "parser": "@babel/eslint-parser",
     "root": true,
     "extends": "mdcs",
     "plugins": [
@@ -84,7 +84,6 @@
   "homepage": "https://threejs.org/",
   "devDependencies": {
     "@babel/core": "^7.12.16",
-    "@babel/eslint-parser": "^7.12.16",
     "@babel/plugin-proposal-class-properties": "^7.12.13",
     "@babel/preset-env": "^7.12.16",
     "@rollup/plugin-babel": "^5.3.0",
