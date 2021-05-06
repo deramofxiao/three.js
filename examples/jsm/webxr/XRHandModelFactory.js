@@ -6,29 +6,34 @@ import {
 	XRHandPrimitiveModel
 } from './XRHandPrimitiveModel.js';
 
-import {
-	XRHandOculusMeshModel
-} from './XRHandOculusMeshModel.js';
+import { 
+	XRHandMeshModel 
+} from "./XRHandMeshModel.js";
 
-function XRHandModel( controller ) {
+import { 
+	fetchProfile 
+} from '../libs/motion-controllers.module.js';
 
-	Object3D.call( this );
+const DEFAULT_PROFILES_PATH = 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles';
+const DEFAULT_PROFILE = 'generic-hand';
 
-	this.controller = controller;
-	this.motionController = null;
-	this.envMap = null;
+class XRHandModel extends Object3D {
 
-	this.mesh = null;
+	constructor( controller ) {
 
-}
+		super();
 
-XRHandModel.prototype = Object.assign( Object.create( Object3D.prototype ), {
+		this.controller = controller;
+		this.motionController = null;
+		this.envMap = null;
 
-	constructor: XRHandModel,
+		this.mesh = null;
 
-	updateMatrixWorld: function ( force ) {
+	}
 
-		Object3D.prototype.updateMatrixWorld.call( this, force );
+	updateMatrixWorld( force ) {
+
+		super.updateMatrixWorld( force );
 
 		if ( this.motionController ) {
 
@@ -36,78 +41,77 @@ XRHandModel.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 		}
 
-	},
-} );
+	}
 
+}
 
-const XRHandModelFactory = ( function () {
+class XRHandModelFactory {
 
-	function XRHandModelFactory() {
+	constructor() {
 
 		this.path = '';
 
 	}
 
-	XRHandModelFactory.prototype = {
+	setPath( path ) {
 
-		constructor: XRHandModelFactory,
+		this.path = path;
+		return this;
 
-		setPath: function ( path ) {
+	}
 
-			this.path = path;
-			return this;
+	createHandModel( controller, profile, options ) {
 
-		},
+		const handModel = new XRHandModel( controller );
 
-		createHandModel: function ( controller, profile, options ) {
+		controller.addEventListener( 'connected', ( event ) => {
 
-			const handModel = new XRHandModel( controller );
+			const xrInputSource = event.data;
 
-			controller.addEventListener( 'connected', ( event ) => {
+			if ( xrInputSource.hand && ! handModel.motionController ) {
 
-				const xrInputSource = event.data;
+				handModel.visible = true;
+				handModel.xrInputSource = xrInputSource;
 
-				if ( xrInputSource.hand && ! handModel.motionController ) {
+				// @todo Detect profile if not provided
+				if ( profile === undefined || profile === 'spheres' ) {
 
-					handModel.visible = true;
-					handModel.xrInputSource = xrInputSource;
+					handModel.motionController = new XRHandPrimitiveModel( handModel, controller, this.path, xrInputSource.handedness, { primitive: 'sphere' } );
 
-					// @todo Detect profile if not provided
-					if ( profile === undefined || profile === 'spheres' ) {
+				} else if ( profile === 'boxes' ) {
 
-						handModel.motionController = new XRHandPrimitiveModel( handModel, controller, this.path, xrInputSource.handedness, { primitive: 'sphere' } );
+					handModel.motionController = new XRHandPrimitiveModel( handModel, controller, this.path, xrInputSource.handedness, { primitive: 'box' } );
 
-					} else if ( profile === 'boxes' ) {
+				} else if ( profile === 'oculus' ) {
 
-						handModel.motionController = new XRHandPrimitiveModel( handModel, controller, this.path, xrInputSource.handedness, { primitive: 'box' } );
+					fetchProfile(xrInputSource, DEFAULT_PROFILES_PATH, DEFAULT_PROFILE).then(({ profile, assetPath }) => {
+	
+						handModel.motionController = new XRHandMeshModel( handModel, controller, assetPath);
 
-					} else if ( profile === 'oculus' ) {
+					}).catch((err) => {
 
-						handModel.motionController = new XRHandOculusMeshModel( handModel, controller, this.path, xrInputSource.handedness, options );
+						console.warn(err);
 
-					}
+					});
 
 				}
 
-			} );
+			}
 
-			controller.addEventListener( 'disconnected', () => {
+		} );
 
-				// handModel.motionController = null;
-				// handModel.remove( scene );
-				// scene = null;
+		controller.addEventListener( 'disconnected', () => {
 
-			} );
+			// handModel.motionController = null;
+			// handModel.remove( scene );
+			// scene = null;
 
-			return handModel;
+		} );
 
-		}
+		return handModel;
 
-	};
+	}
 
-	return XRHandModelFactory;
-
-} )();
-
+}
 
 export { XRHandModelFactory };
